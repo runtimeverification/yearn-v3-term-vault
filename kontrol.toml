@@ -39,14 +39,8 @@ auto_abstract              = true
 run-constructor            = false
 bmc-depth                  = 1
 match-test                 = [
-        "RepoTokenListTest.testGetCumulativeDataEmpty",
-        "RepoTokenListTest.testGetCumulativeDataSymbolic",
-        "RepoTokenListTest.testGetPresentValueEmpty",
-      # "RepoTokenListTest.testGetPresentValueSymbolic",
-        "TermAuctionListTest.testGetCumulativeDataEmpty",
-        "TermAuctionListTest.testGetCumulativeDataSymbolic",
-        "TermAuctionListTest.testGetPresentValueEmpty",
-        "TermAuctionListTest.testGetPresentValueSymbolic",
+        "RepoTokenListInvariantsTest.testInsertSortedNewToken",
+        "RepoTokenListInvariantsTest.testInsertSortedDuplicateToken",
     ]
 ast                        = true
 

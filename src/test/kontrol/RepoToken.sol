@@ -3,31 +3,33 @@ pragma solidity 0.8.23;
 import "forge-std/Test.sol";
 import "kontrol-cheatcodes/KontrolCheats.sol";
 
+import "src/interfaces/term/ITermRepoServicer.sol";
 import "src/interfaces/term/ITermRepoToken.sol";
 
 import "src/test/kontrol/Constants.sol";
+import "src/test/kontrol/TermRepoServicer.sol";
 
 contract RepoToken is ITermRepoToken, Test, KontrolCheats {
     mapping(address => uint256) _balance;
     uint256 _redemptionTimestamp;
     uint256 _redemptionValue;
+    TermRepoServicer _termRepoServicer;
 
     function initializeSymbolic() public {
         kevm.symbolicStorage(address(this));
 
         uint256 senderBalance = freshUInt256();
-        vm.assume(0 < senderBalance); // TODO: confirm that this is reasonable
         vm.assume(senderBalance < ETH_UPPER_BOUND);
         _balance[msg.sender] = senderBalance;
 
-        uint256 redemptionTimestamp = freshUInt256();
-        vm.assume(block.timestamp < redemptionTimestamp); // TODO: confirm that this is reasonable
-        vm.assume(redemptionTimestamp < TIME_UPPER_BOUND);
-        _redemptionTimestamp = redemptionTimestamp;
+        _redemptionTimestamp = freshUInt256();
+        vm.assume(_redemptionTimestamp < TIME_UPPER_BOUND);
 
-        uint256 redemptionValue = freshUInt256();
-        vm.assume(redemptionValue < ETH_UPPER_BOUND);
-        _redemptionValue = redemptionValue;
+        _redemptionValue = freshUInt256();
+        vm.assume(_redemptionValue < ETH_UPPER_BOUND);
+
+        _termRepoServicer = new TermRepoServicer();
+        _termRepoServicer.initializeSymbolic(address(this));
     }
 
     function decimals() public view virtual returns (uint8) {
@@ -50,7 +52,7 @@ contract RepoToken is ITermRepoToken, Test, KontrolCheats {
     ) {
         redemptionTimestamp = _redemptionTimestamp;
         purchaseToken = kevm.freshAddress();
-        termRepoServicer = kevm.freshAddress();
+        termRepoServicer = address(_termRepoServicer);
         termRepoCollateralManager = kevm.freshAddress();
     }
 
