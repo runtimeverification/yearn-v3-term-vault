@@ -384,6 +384,7 @@ library RepoTokenList {
         // If the list is empty, set the new repoToken as the head
         if (current == NULL_NODE) {
             listData.head = repoToken;
+            listData.nodes[repoToken].next = NULL_NODE;
             return;
         }
 

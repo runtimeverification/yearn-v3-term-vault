@@ -103,6 +103,7 @@ library TermAuctionList {
         // If the list is empty, set the new repoToken as the head
         if (current == NULL_NODE) {
             listData.head = offerId;
+            listData.nodes[offerId].next = NULL_NODE;
             listData.offers[offerId] = pendingOffer;
             return;
         }
