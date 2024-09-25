@@ -36,9 +36,6 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
     function _newRepoToken() internal returns (address) {
         RepoToken repoToken = new RepoToken();
         repoToken.initializeSymbolic();
-        // By making the `_repoTokenList` storage symbolic, we forget that the next-pointers
-        // of all nodes are zero by default, but the code relies on this, and so we have to recover it.
-        vm.assume(_repoTokenList.nodes[address(repoToken)].next == RepoTokenList.NULL_NODE);
 
         return address(repoToken);
     }
