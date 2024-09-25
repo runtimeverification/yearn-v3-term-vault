@@ -415,6 +415,7 @@ library RepoTokenList {
             // If at the end of the list, insert repoToken after current
             if (next == NULL_NODE) {
                 listData.nodes[current].next = repoToken;
+                listData.nodes[repoToken].next = NULL_NODE;
                 break;
             }
 
