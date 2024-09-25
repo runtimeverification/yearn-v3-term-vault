@@ -17,7 +17,7 @@ enum Mode {
 contract RepoTokenListInvariantsTest is Test, KontrolCheats {
     using RepoTokenList for RepoTokenListData;
 
-    RepoTokenListData _listData;
+    RepoTokenListData _repoTokenList;
 
     /**
      * Either assume or assert a condition, depending on the specified mode.
@@ -36,9 +36,9 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
     function _newRepoToken() internal returns (address) {
         RepoToken repoToken = new RepoToken();
         repoToken.initializeSymbolic();
-        // By making the `_listData` storage symbolic, we forget that the next-pointers
+        // By making the `_repoTokenList` storage symbolic, we forget that the next-pointers
         // of all nodes are zero by default, but the code relies on this, and so we have to recover it.
-        vm.assume(_listData.nodes[address(repoToken)].next == RepoTokenList.NULL_NODE);
+        vm.assume(_repoTokenList.nodes[address(repoToken)].next == RepoTokenList.NULL_NODE);
 
         return address(repoToken);
     }
@@ -58,7 +58,7 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
     }
 
     /**
-     * Initialize _listData to a RepoTokenList of arbitrary size, where all
+     * Initialize _repoTokenList to a RepoTokenList of arbitrary size, where all
      * items are distinct RepoTokens with symbolic storage.
      */
     function _initializeRepoTokenList() internal {
@@ -68,18 +68,18 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
             address current = _newRepoToken();
 
             if (previous == RepoTokenList.NULL_NODE) {
-                _listData.head = current;
+                _repoTokenList.head = current;
             } else {
-                _listData.nodes[previous].next = current;
+                _repoTokenList.nodes[previous].next = current;
             }
 
             previous = current;
         }
 
         if (previous == RepoTokenList.NULL_NODE) {
-            _listData.head = RepoTokenList.NULL_NODE;
+            _repoTokenList.head = RepoTokenList.NULL_NODE;
         } else {
-            _listData.nodes[previous].next = RepoTokenList.NULL_NODE;
+            _repoTokenList.nodes[previous].next = RepoTokenList.NULL_NODE;
         }
     }
 
@@ -88,7 +88,7 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
      */
     function _establishSortedByMaturity(Mode mode) internal {
         address previous = RepoTokenList.NULL_NODE;
-        address current = _listData.head;
+        address current = _repoTokenList.head;
 
         while (current != RepoTokenList.NULL_NODE) {
             if (previous != RepoTokenList.NULL_NODE) {
@@ -98,7 +98,7 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
             }
 
             previous = current;
-            current = _listData.nodes[current].next;
+            current = _repoTokenList.nodes[current].next;
         }
     }
 
@@ -106,17 +106,17 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
      * Assume or assert that there are no duplicate tokens in the list.
      */
     function _establishNoDuplicates(Mode mode) internal {
-        address current = _listData.head;
+        address current = _repoTokenList.head;
 
         while (current != RepoTokenList.NULL_NODE) {
-            address other = _listData.nodes[current].next;
+            address other = _repoTokenList.nodes[current].next;
 
             while (other != RepoTokenList.NULL_NODE) {
                 _establish(mode, current != other);
-                other = _listData.nodes[other].next;
+                other = _repoTokenList.nodes[other].next;
             }
 
-            current = _listData.nodes[current].next;
+            current = _repoTokenList.nodes[current].next;
         }
     }
 
@@ -125,14 +125,14 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
      * (i.e. all token maturities are greater than the current timestamp).
      */
     function _establishNoMaturedTokens(Mode mode) internal {
-        address current = _listData.head;
+        address current = _repoTokenList.head;
 
         while (current != RepoTokenList.NULL_NODE) {
             uint256 currentMaturity = _getRepoTokenMaturity(current);
 
             _establish(mode, block.timestamp < currentMaturity);
 
-            current = _listData.nodes[current].next;
+            current = _repoTokenList.nodes[current].next;
         }
     }
 
@@ -140,14 +140,14 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
      * Assume or assert that all tokens in the list have balance > 0.
      */
     function _establishPositiveBalance(Mode mode) internal {
-        address current = _listData.head;
+        address current = _repoTokenList.head;
 
         while (current != RepoTokenList.NULL_NODE) {
             uint256 repoTokenBalance = _getRepoTokenBalance(current);
 
             _establish(mode, 0 < repoTokenBalance);
 
-            current = _listData.nodes[current].next;
+            current = _repoTokenList.nodes[current].next;
         }
     }
 
@@ -160,11 +160,11 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
      */
     function _countNodesInList() internal returns (uint256) {
         uint256 count = 0;
-        address current = _listData.head;
+        address current = _repoTokenList.head;
 
         while (current != RepoTokenList.NULL_NODE) {
             ++count;
-            current = _listData.nodes[current].next;
+            current = _repoTokenList.nodes[current].next;
         }
 
         return count;
@@ -174,14 +174,14 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
      * Return true if the given RepoToken is in the list, and false otherwise.
      */
     function _repoTokenInList(address repoToken) internal returns (bool) {
-        address current = _listData.head;
+        address current = _repoTokenList.head;
 
         while (current != RepoTokenList.NULL_NODE) {
             if (current == repoToken) {
                 return true;
             }
 
-            current = _listData.nodes[current].next;
+            current = _repoTokenList.nodes[current].next;
         }
 
         return false;
@@ -213,7 +213,7 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
         vm.assume(0 < balance);
 
         // Call the function being tested
-        _listData.insertSorted(repoToken);
+        _repoTokenList.insertSorted(repoToken);
 
 
         // Assert that the size of the list increased by 1
@@ -253,7 +253,7 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
         vm.assume(_repoTokenInList(repoToken));
 
         // Call the function being tested
-        _listData.insertSorted(repoToken);
+        _repoTokenList.insertSorted(repoToken);
 
         // Assert that the size of the list didn't change
         assertEq(_countNodesInList(), count);
@@ -287,7 +287,7 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
         // succeeds? Otherwise some of the invariants might not be preserved.
 
         // Call the function being tested
-        _listData.removeAndRedeemMaturedTokens();
+        _repoTokenList.removeAndRedeemMaturedTokens();
 
         // Assert that the size of the list is less than or equal to before
         assertLe(_countNodesInList(), count);
