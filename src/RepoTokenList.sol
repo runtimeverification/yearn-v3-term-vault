@@ -41,7 +41,7 @@ library RepoTokenList {
      *
      * @dev This function calls the `config()` method on the repoToken to retrieve its configuration details,
      * including the redemption timestamp, which it then returns.
-     */    
+     */
     function getRepoTokenMaturity(address repoToken) internal view returns (uint256 redemptionTimestamp) {
         (redemptionTimestamp, , ,) = ITermRepoToken(repoToken).config();
     }
@@ -88,8 +88,8 @@ library RepoTokenList {
             while (current != NULL_NODE) {
                 holdingsArray[i++] = current;
                 current = _getNext(listData, current);
-            } 
-        }   
+            }
+        }
     }
 
     /**
@@ -124,12 +124,12 @@ library RepoTokenList {
      * @dev The `repoToken` and `repoTokenAmount` parameters are optional and provide flexibility
      * to adjust the calculations to include the provided repoToken and amount. If `repoToken` is
      * set to `address(0)` or `repoTokenAmount` is `0`, the function calculates the cumulative
-     * data without specific token adjustments. 
+     * data without specific token adjustments.
      */
     function getCumulativeRepoTokenData(
         RepoTokenListData storage listData,
         ITermDiscountRateAdapter discountRateAdapter,
-        address repoToken, 
+        address repoToken,
         uint256 repoTokenAmount,
         uint256 purchaseTokenPrecision
     ) internal view returns (uint256 cumulativeWeightedTimeToMaturity, uint256 cumulativeRepoTokenAmount, bool found) {
@@ -150,7 +150,7 @@ library RepoTokenList {
                 }
 
                 // Convert the repo token balance to base asset precision
-                uint256 repoTokenBalanceInBaseAssetPrecision = 
+                uint256 repoTokenBalanceInBaseAssetPrecision =
                     RepoTokenUtils.getNormalizedRepoTokenAmount(
                         current, repoTokenBalance, purchaseTokenPrecision, discountRateAdapter.repoRedemptionHaircut(current)
                     );
@@ -176,16 +176,16 @@ library RepoTokenList {
      * @param discountRateAdapter The discount rate adapter
      * @param purchaseTokenPrecision The precision of the purchase token
      * @return totalPresentValue The total present value of the repoTokens
-     * @dev  Aggregates the present value of all repoTokens in the list. 
+     * @dev  Aggregates the present value of all repoTokens in the list.
      */
     function getPresentValue(
-        RepoTokenListData storage listData, 
+        RepoTokenListData storage listData,
         ITermDiscountRateAdapter discountRateAdapter,
         uint256 purchaseTokenPrecision
     ) internal view returns (uint256 totalPresentValue) {
         // If the list is empty, return 0
         if (listData.head == NULL_NODE) return 0;
-        
+
         address current = listData.head;
         while (current != NULL_NODE) {
             uint256 currentMaturity = getRepoTokenMaturity(current);
@@ -194,7 +194,7 @@ library RepoTokenList {
 
             // Convert repo token balance to base asset precision
             // (ratePrecision * repoPrecision * purchasePrecision) / (repoPrecision * ratePrecision) = purchasePrecision
-            uint256 repoTokenBalanceInBaseAssetPrecision = 
+            uint256 repoTokenBalanceInBaseAssetPrecision =
                 RepoTokenUtils.getNormalizedRepoTokenAmount(
                     current, repoTokenBalance, purchaseTokenPrecision, discountRateAdapter.repoRedemptionHaircut(current)
                 );
@@ -209,8 +209,8 @@ library RepoTokenList {
             }
 
             // Move to the next token in the list
-            current = _getNext(listData, current);                    
-        }    
+            current = _getNext(listData, current);
+        }
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -250,7 +250,7 @@ library RepoTokenList {
                 if (repoTokenBalance > 0) {
                     (, , address termRepoServicer,) = ITermRepoToken(current).config();
                     try ITermRepoServicer(termRepoServicer).redeemTermRepoTokens(
-                        address(this), 
+                        address(this),
                         repoTokenBalance
                     ) {
                         removeMaturedToken = true;
@@ -268,7 +268,7 @@ library RepoTokenList {
                     if (current == listData.head) {
                         listData.head = next;
                     }
-                    
+
                     listData.nodes[prev].next = next;
                     delete listData.nodes[current];
                     delete listData.discountRates[current];
@@ -280,19 +280,19 @@ library RepoTokenList {
 
             prev = current;
             current = next;
-        }        
-    }    
+        }
+    }
 
     /**
      * @notice Validates a repoToken against specific criteria
      * @param listData The list data
      * @param repoToken The repoToken to validate
      * @param asset The address of the base asset
-     * @return redemptionTimestamp The redemption timestamp of the validated repoToken 
-     * 
+     * @return redemptionTimestamp The redemption timestamp of the validated repoToken
+     *
      * @dev Ensures the repoToken is deployed, matches the purchase token, is not matured, and meets collateral requirements.
      * Reverts with `InvalidRepoToken` if any validation check fails.
-     */     
+     */
     function validateRepoToken(
         RepoTokenListData storage listData,
         ITermRepoToken repoToken,
@@ -335,11 +335,11 @@ library RepoTokenList {
      * @param repoToken The repoToken to validate and insert
      * @param discountRateAdapter The discount rate adapter
      * @param asset The address of the base asset
-     * @return discountRate The discount rate to be applied to the validated repoToken 
-     * @return redemptionTimestamp The redemption timestamp of the validated repoToken     
+     * @return discountRate The discount rate to be applied to the validated repoToken
+     * @return redemptionTimestamp The redemption timestamp of the validated repoToken
      */
     function validateAndInsertRepoToken(
-        RepoTokenListData storage listData, 
+        RepoTokenListData storage listData,
         ITermRepoToken repoToken,
         ITermDiscountRateAdapter discountRateAdapter,
         address asset
@@ -375,7 +375,7 @@ library RepoTokenList {
      * @param repoToken The address of the repoToken to be inserted
      *
      * @dev Inserts the `repoToken` into the `listData` while maintaining the list sorted by the repoTokens' maturity timestamps.
-     * The function iterates through the list to find the correct position for the new `repoToken` and updates the pointers accordingly.     
+     * The function iterates through the list to find the correct position for the new `repoToken` and updates the pointers accordingly.
      */
     function insertSorted(RepoTokenListData storage listData, address repoToken) internal {
         // Start at the head of the list
@@ -398,8 +398,8 @@ library RepoTokenList {
             uint256 currentMaturity = getRepoTokenMaturity(current);
             uint256 maturityToInsert = getRepoTokenMaturity(repoToken);
 
-            // Insert repoToken before current if its maturity is less than or equal
-            if (maturityToInsert <= currentMaturity) {
+            // Insert repoToken before current if its maturity is less than
+            if (maturityToInsert < currentMaturity) {
                 if (prev == NULL_NODE) {
                     listData.head = repoToken;
                 } else {
@@ -411,7 +411,7 @@ library RepoTokenList {
 
             // Move to the next node
             address next = _getNext(listData, current);
-            
+
             // If at the end of the list, insert repoToken after current
             if (next == NULL_NODE) {
                 listData.nodes[current].next = repoToken;

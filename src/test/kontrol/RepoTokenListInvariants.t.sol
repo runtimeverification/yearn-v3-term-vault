@@ -36,6 +36,9 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
     function _newRepoToken() internal returns (address) {
         RepoToken repoToken = new RepoToken();
         repoToken.initializeSymbolic();
+        // By making the `_listData` storage symbolic, we forget that the next-pointers
+        // of all nodes are zero by default, but the code relies on this, and so we have to recover it.
+        vm.assume(_listData.nodes[address(repoToken)].next == RepoTokenList.NULL_NODE);
 
         return address(repoToken);
     }
@@ -63,7 +66,7 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
 
         while (kevm.freshBool() != 0) {
             address current = _newRepoToken();
-     
+
             if (previous == RepoTokenList.NULL_NODE) {
                 _listData.head = current;
             } else {
@@ -177,7 +180,7 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
             if (current == repoToken) {
                 return true;
             }
-            
+
             current = _listData.nodes[current].next;
         }
 
@@ -212,6 +215,7 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
         // Call the function being tested
         _listData.insertSorted(repoToken);
 
+
         // Assert that the size of the list increased by 1
         assertEq(_countNodesInList(), count + 1);
 
@@ -236,7 +240,7 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
         kevm.symbolicStorage(address(this));
         _initializeRepoTokenList();
 
-        // Assume that the invariants are satisfied before the function is called       
+        // Assume that the invariants are satisfied before the function is called
         _establishSortedByMaturity(Mode.Assume);
         _establishNoDuplicates(Mode.Assume);
         _establishNoMaturedTokens(Mode.Assume);
