@@ -262,7 +262,7 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
         _establishSortedByMaturity(Mode.Assert);
         _establishNoDuplicateTokens(Mode.Assert);
         _establishNoMaturedTokens(Mode.Assert);
-        _establishPositiveBalance(Mode.Assume);
+        _establishPositiveBalance(Mode.Assert);
     }
 
     /**
@@ -295,6 +295,6 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
 
         // Now the following invariants should hold as well
         _establishNoMaturedTokens(Mode.Assert);
-        _establishPositiveBalance(Mode.Assume);
+        _establishPositiveBalance(Mode.Assert);
     }
 }
