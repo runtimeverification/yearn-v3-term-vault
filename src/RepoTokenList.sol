@@ -243,7 +243,7 @@ library RepoTokenList {
         address prev = current;
         while (current != NULL_NODE) {
             address next;
-            if (getRepoTokenMaturity(current) < block.timestamp) {
+            if (getRepoTokenMaturity(current) <= block.timestamp) {
                 bool removeMaturedToken;
                 uint256 repoTokenBalance = ITermRepoToken(current).balanceOf(address(this));
 
