@@ -102,7 +102,7 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
     /**
      * Assume or assert that there are no duplicate tokens in the list.
      */
-    function _establishNoDuplicates(Mode mode) internal {
+    function _establishNoDuplicateTokens(Mode mode) internal {
         address current = _repoTokenList.head;
 
         while (current != RepoTokenList.NULL_NODE) {
@@ -195,7 +195,7 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
 
         // Assume that the invariants are satisfied before the function is called
         _establishSortedByMaturity(Mode.Assume);
-        _establishNoDuplicates(Mode.Assume);
+        _establishNoDuplicateTokens(Mode.Assume);
         _establishNoMaturedTokens(Mode.Assume);
         _establishPositiveBalance(Mode.Assume);
 
@@ -221,7 +221,7 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
 
         // Assert that the invariants are preserved
         _establishSortedByMaturity(Mode.Assert);
-        _establishNoDuplicates(Mode.Assert);
+        _establishNoDuplicateTokens(Mode.Assert);
         _establishNoMaturedTokens(Mode.Assert);
         _establishPositiveBalance(Mode.Assert);
     }
@@ -239,7 +239,7 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
 
         // Assume that the invariants are satisfied before the function is called
         _establishSortedByMaturity(Mode.Assume);
-        _establishNoDuplicates(Mode.Assume);
+        _establishNoDuplicateTokens(Mode.Assume);
         _establishNoMaturedTokens(Mode.Assume);
         _establishPositiveBalance(Mode.Assume);
 
@@ -260,7 +260,7 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
 
         // Assert that the invariants are preserved
         _establishSortedByMaturity(Mode.Assert);
-        _establishNoDuplicates(Mode.Assert);
+        _establishNoDuplicateTokens(Mode.Assert);
         _establishNoMaturedTokens(Mode.Assert);
         _establishPositiveBalance(Mode.Assume);
     }
@@ -278,7 +278,7 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
 
         // Assume that the invariants are satisfied before the function is called
         _establishSortedByMaturity(Mode.Assume);
-        _establishNoDuplicates(Mode.Assume);
+        _establishNoDuplicateTokens(Mode.Assume);
 
         // TODO: Can we assume for this test that token redemption always
         // succeeds? Otherwise some of the invariants might not be preserved.
@@ -291,7 +291,7 @@ contract RepoTokenListInvariantsTest is Test, KontrolCheats {
 
         // Assert that the invariants are preserved
         _establishSortedByMaturity(Mode.Assert);
-        _establishNoDuplicates(Mode.Assert);
+        _establishNoDuplicateTokens(Mode.Assert);
 
         // Now the following invariants should hold as well
         _establishNoMaturedTokens(Mode.Assert);
