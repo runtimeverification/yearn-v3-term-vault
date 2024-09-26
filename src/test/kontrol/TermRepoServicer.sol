@@ -23,7 +23,7 @@ contract TermRepoServicer is ITermRepoServicer, Test, KontrolCheats {
         kevm.symbolicStorage(address(this));
         kevm.symbolicStorage(_termRepoToken);
     }
-    
+
     function termRepoToken() external view returns (address) {
         return _termRepoToken;
     }
