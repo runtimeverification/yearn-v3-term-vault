@@ -10,6 +10,15 @@ import "src/test/kontrol/Constants.sol";
 contract TermAuctionOfferLocker is ITermAuctionOfferLocker, Test, KontrolCheats {
     mapping(bytes32 => TermAuctionOffer) _lockedOffers;
 
+    function initializeSymbolic(bytes32 offerId) public {
+        kevm.symbolicStorage(address(this));
+
+        TermAuctionOffer memory offer = _lockedOffers[offerId];
+
+        offer.amount = freshUInt256();
+        vm.assume(offer.amount < ETH_UPPER_BOUND);
+    }
+
     function termRepoId() external view returns (bytes32) {
         return bytes32(freshUInt256());
     }
@@ -39,24 +48,7 @@ contract TermAuctionOfferLocker is ITermAuctionOfferLocker, Test, KontrolCheats 
     }
 
     function lockedOffer(bytes32 id) external view returns (TermAuctionOffer memory) {
-        TermAuctionOffer memory offer = _lockedOffers[id];
-
-        vm.assume(offer.offerPriceRevealed < ETH_UPPER_BOUND);
-        vm.assume(offer.amount < ETH_UPPER_BOUND);
-
-        /*
-        offer.id = bytes32(freshUInt256());
-        offer.offeror = kevm.freshAddress();
-        offer.offerPriceHash = bytes32(freshUInt256());
-        offer.offerPriceRevealed = freshUInt256();
-        vm.assume(offer.offerPriceRevealed < ETH_UPPER_BOUND);
-        offer.amount = freshUInt256();
-        vm.assume(offer.amount < ETH_UPPER_BOUND);
-        offer.purchaseToken = kevm.freshAddress();
-        offer.isRevealed = kevm.freshBool() > 0;
-        */
-
-        return offer;
+        return _lockedOffers[id];
     }
 
     function lockOffers(
@@ -75,6 +67,11 @@ contract TermAuctionOfferLocker is ITermAuctionOfferLocker, Test, KontrolCheats 
     }
 
     function unlockOffers(bytes32[] calldata offerIds) external {
+        // Function might revert in some cases
+        require(kevm.freshBool() != 0);
+
+        // TODO: Other side effects?
+
         kevm.symbolicStorage(address(this));
     }
 }

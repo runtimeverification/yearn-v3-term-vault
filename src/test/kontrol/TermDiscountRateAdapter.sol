@@ -11,14 +11,16 @@ contract TermDiscountRateAdapter is ITermDiscountRateAdapter, Test, KontrolCheat
     mapping(address => uint256) _repoRedemptionHaircut;
     mapping(address => uint256) _discountRate;
 
+    function initializeSymbolic() public {
+        kevm.symbolicStorage(address(this));
+    }
+
     function initializeSymbolicFor(address repoToken) public {
         uint256 repoRedemptionHaircut = freshUInt256();
         vm.assume(repoRedemptionHaircut <= 1e18);
         _repoRedemptionHaircut[repoToken] = repoRedemptionHaircut;
 
-
         uint256 discountRate = freshUInt256();
-        vm.assume(0 < discountRate);
         vm.assume(discountRate < ETH_UPPER_BOUND);
         _discountRate[repoToken] = discountRate;
     }
