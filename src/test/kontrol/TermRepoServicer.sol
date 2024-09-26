@@ -18,10 +18,10 @@ contract TermRepoServicer is ITermRepoServicer, Test, KontrolCheats {
         uint256 amountToRedeem
     ) external {
         // Function might revert in some cases
-        require(kevm.freshBool() != 0);
+        //require(kevm.freshBool() != 0);
 
-        kevm.symbolicStorage(address(this));
         kevm.symbolicStorage(_termRepoToken);
+        kevm.symbolicStorage(address(this));
     }
 
     function termRepoToken() external view returns (address) {
