@@ -177,12 +177,13 @@ contract TermAuctionListInvariantsTest is KontrolTest {
     /**
      * Assume or assert that there are no completed auctions in the list.
      */
-    function _establishNoCompletedAuctions(Mode mode) internal {
+    function _establishNoCompletedOrCancelledAuctions(Mode mode) internal {
         bytes32 current = _termAuctionList.head;
 
         while (current != TermAuctionList.NULL_NODE) {
             PendingOffer storage offer = _termAuctionList.offers[current];
             _establish(mode, !offer.termAuction.auctionCompleted());
+            _establish(mode, !offer.termAuction.auctionCancelledForWithdrawal());
 
             current = _termAuctionList.nodes[current].next;
         }
@@ -313,7 +314,7 @@ contract TermAuctionListInvariantsTest is KontrolTest {
 
         // Assume that the invariants hold before the function is called
         _establishOfferAmountMatchesAmountLocked(Mode.Assume, bytes32(0));
-        _establishNoCompletedAuctions(Mode.Assume);
+        _establishNoCompletedOrCancelledAuctions(Mode.Assume);
         _establishPositiveOfferAmounts(Mode.Assume);
 
         // Save the number of offers in the list before the function is called
@@ -368,7 +369,7 @@ contract TermAuctionListInvariantsTest is KontrolTest {
         // Assert that the invariants are preserved
         _establishSortedByAuctionId(Mode.Assert);
         _establishNoDuplicateOffers(Mode.Assert);
-        _establishNoCompletedAuctions(Mode.Assert);
+        _establishNoCompletedOrCancelledAuctions(Mode.Assert);
         _establishPositiveOfferAmounts(Mode.Assert);
         _establishOfferAmountMatchesAmountLocked(Mode.Assert, bytes32(0));
     }
@@ -399,7 +400,7 @@ contract TermAuctionListInvariantsTest is KontrolTest {
 
         // Assume that the invariants hold before the function is called
         _establishOfferAmountMatchesAmountLocked(Mode.Assume, offerId);
-        _establishNoCompletedAuctions(Mode.Assume);
+        _establishNoCompletedOrCancelledAuctions(Mode.Assume);
         _establishPositiveOfferAmounts(Mode.Assume);
 
         PendingOffer memory offer = _termAuctionList.offers[offerId];
@@ -424,7 +425,7 @@ contract TermAuctionListInvariantsTest is KontrolTest {
         // Assert that the invariants are preserved
         _establishSortedByAuctionId(Mode.Assert);
         _establishNoDuplicateOffers(Mode.Assert);
-        _establishNoCompletedAuctions(Mode.Assert);
+        _establishNoCompletedOrCancelledAuctions(Mode.Assert);
         _establishPositiveOfferAmounts(Mode.Assert);
         _establishOfferAmountMatchesAmountLocked(Mode.Assert, bytes32(0));
     }
@@ -546,7 +547,7 @@ contract TermAuctionListInvariantsTest is KontrolTest {
         _establishOfferAmountMatchesAmountLocked(Mode.Assert, bytes32(0));
 
         // Now the following invariants should hold as well
-        _establishNoCompletedAuctions(Mode.Assert);
+        _establishNoCompletedOrCancelledAuctions(Mode.Assert);
         _establishPositiveOfferAmounts(Mode.Assert);
     }
 }

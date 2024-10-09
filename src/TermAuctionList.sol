@@ -99,7 +99,7 @@ library TermAuctionList {
      */
     function insertPending(TermAuctionListData storage listData, bytes32 offerId, PendingOffer memory pendingOffer) internal {
         bytes32 current = listData.head;
-        require(!pendingOffer.termAuction.auctionCompleted());
+        require(!pendingOffer.termAuction.auctionCompleted() && !pendingOffer.termAuction.auctionCancelledForWithdrawal());
 
         // If the list is empty, set the new repoToken as the head
         if (current == NULL_NODE) {
