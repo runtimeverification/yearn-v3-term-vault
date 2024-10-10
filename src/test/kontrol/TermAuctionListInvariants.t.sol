@@ -59,6 +59,13 @@ contract TermAuctionListInvariantsTest is KontrolTest {
     }
 
     /**
+     * Return the auction for a given offer in the list.
+     */
+    function _getOfferAmount(bytes32 offerId) internal view returns(uint256) {
+        return _termAuctionList.offers[offerId].offerAmount;
+    }
+
+    /**
      * Deploy & initialize RepoToken and OfferLocker with the same RepoServicer
      */
     function newRepoTokenAndOfferLocker() public returns (
@@ -367,6 +374,9 @@ contract TermAuctionListInvariantsTest is KontrolTest {
         // Assert that the new offer is in the list
         assert(_offerInList(offerId));
 
+        // Assert that the offer amount is the one submitted in the offer
+        assert(_getOfferAmount(offerId) == pendingOffer.offerAmount);
+
         // Assert that the invariants are preserved
         _establishSortedByAuctionId(Mode.Assert);
         _establishNoDuplicateOffers(Mode.Assert);
@@ -384,10 +394,6 @@ contract TermAuctionListInvariantsTest is KontrolTest {
         bytes32 offerId,
         PendingOffer memory pendingOffer
     ) external {
-        // offerId must not equal zero, otherwise the linked list breaks
-        // TODO: Does the code protect against this?
-        vm.assume(offerId != TermAuctionList.NULL_NODE);
-
         // Save the number of offers in the list before the function is called
         uint256 count = _countOffersInList();
 
@@ -420,8 +426,11 @@ contract TermAuctionListInvariantsTest is KontrolTest {
         // Assert that the size of the list didn't change
         assert(_countOffersInList() == count);
 
-        // Assert that the new offer is in the list
+        // Assert that the offer is in the list
         assert(_offerInList(offerId));
+
+        // Assert that the offer amount was updated
+        assert(_getOfferAmount(offerId) == pendingOffer.offerAmount);
 
         // Assert that the invariants are preserved
         _establishSortedByAuctionId(Mode.Assert);
