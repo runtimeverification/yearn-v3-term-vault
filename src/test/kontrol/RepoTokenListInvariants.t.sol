@@ -204,24 +204,29 @@ contract RepoTokenListInvariantsTest is KontrolTest {
         repoTokens = new address[](length);
 
         while (current != RepoTokenList.NULL_NODE) {
-            repoTokens[i] = current;
+            repoTokens[i++] = current;
             current = _repoTokenList.nodes[current].next;
         }
     }
 
-    function _establishListPreservation(address insertedRepoToken, address[] memory repoTokens, uint256 repoTokensCount) internal view {
+    function _establishInsertListPreservation(address insertedRepoToken, address[] memory repoTokens, uint256 repoTokensCount) internal view {
         address current = _repoTokenList.head;
         uint256 i = 0;
 
         if(insertedRepoToken != address(0)) {
 
             while (current != RepoTokenList.NULL_NODE && i < repoTokensCount) {
-                if(current != repoTokens[i++]) {
+                if(current != repoTokens[i]) {
                     assert (current == insertedRepoToken);
-                    i++;
+                    current = _repoTokenList.nodes[current].next;
+                    break;
                 }
-
+                i++;
                 current = _repoTokenList.nodes[current].next;
+            }
+
+            if (current != RepoTokenList.NULL_NODE && i == repoTokensCount) {
+                assert (current == insertedRepoToken);
             }
         }
 
@@ -229,8 +234,19 @@ contract RepoTokenListInvariantsTest is KontrolTest {
             assert(current == repoTokens[i++]);
             current = _repoTokenList.nodes[current].next;
         }
+    }
 
-        assert(current == RepoTokenList.NULL_NODE && i == repoTokensCount);
+    function _establishRemoveListPreservation(address[] memory repoTokens, uint256 repoTokensCount) internal view {
+        address current = _repoTokenList.head;
+        uint256 i = 0;
+
+        while (current != RepoTokenList.NULL_NODE && i < repoTokensCount) {
+            if(current == repoTokens[i++]) {
+                current = _repoTokenList.nodes[current].next;
+            }
+        }
+
+        assert(current == RepoTokenList.NULL_NODE);
     }
 
     /**
@@ -264,12 +280,12 @@ contract RepoTokenListInvariantsTest is KontrolTest {
 
 
         // Assert that the size of the list increased by 1
-        //assert(_countNodesInList() == count + 1);
+        assert(_countNodesInList() == count + 1);
 
         // Assert that the new RepoToken is in the list
         //assert(_repoTokenInList(repoToken));
 
-        _establishListPreservation(repoToken, repoTokens, count + 1);
+        _establishInsertListPreservation(repoToken, repoTokens, count);
 
         // Assert that the invariants are preserved
         _establishSortedByMaturity(Mode.Assert);
@@ -306,12 +322,12 @@ contract RepoTokenListInvariantsTest is KontrolTest {
         _repoTokenList.insertSorted(repoToken);
 
         // Assert that the size of the list didn't change
-        //assert(_countNodesInList() == count);
+        assert(_countNodesInList() == count);
 
         // Assert that the RepoToken is still in the list
         //assert(_repoTokenInList(repoToken));
 
-        _establishListPreservation(address(0), repoTokens, count);
+        _establishInsertListPreservation(address(0), repoTokens, count);
 
         // Assert that the invariants are preserved
         _establishSortedByMaturity(Mode.Assert);
@@ -341,6 +357,7 @@ contract RepoTokenListInvariantsTest is KontrolTest {
     function testRemoveAndRedeemMaturedTokens() external {
         // Save the number of tokens in the list before the function is called
         uint256 count = _countNodesInList();
+        address[] memory repoTokens = _repoTokensListToArray(count);
 
         // Our initialization procedure guarantees this invariant,
         // so we assert instead of assuming
@@ -358,6 +375,8 @@ contract RepoTokenListInvariantsTest is KontrolTest {
 
         // Assert that the size of the list is less than or equal to before
         assert(_countNodesInList() <= count);
+
+        _establishRemoveListPreservation(repoTokens, count);
 
         // Assert that the invariants are preserved
         _establishSortedByMaturity(Mode.Assert);
