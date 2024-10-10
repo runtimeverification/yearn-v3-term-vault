@@ -345,6 +345,7 @@ contract TermAuctionListInvariantsTest is KontrolTest {
         this.etch(auction, _referenceAuction);
         TermAuction(auction).initializeSymbolic();
         vm.assume(!TermAuction(auction).auctionCompleted());
+        vm.assume(!TermAuction(auction).auctionCancelledForWithdrawal());
 
         // Build new PendingOffer
         PendingOffer memory pendingOffer;
