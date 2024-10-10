@@ -175,7 +175,6 @@ library TermAuctionList {
 
             uint256 offerAmount = offer.offerLocker.lockedOffer(current).amount;
             bool removeNode;
-            bool insertRepoToken;
 
             if (offer.termAuction.auctionCompleted()) {
                 // If auction is completed and closed, mark for removal and prepare to insert repo token

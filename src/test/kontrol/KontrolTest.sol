@@ -11,7 +11,7 @@ contract KontrolTest is Test, KontrolCheats {
     // Note: 2 ** 35 takes us to year 3058
     uint256 constant timeUpperBound = 2 ** 35;
 
-    function infoAssert(bool condition, string memory message) external {
+    function infoAssert(bool condition, string memory message) external pure {
         if (!condition) {
             revert(message);
         }
@@ -55,7 +55,7 @@ contract KontrolTest is Test, KontrolCheats {
         vm.store(contractAddress, bytes32(slot), bytes32(uint256(uint160(value))));
     }
 
-    function _assumeNoOverflow(uint256 augend, uint256 addend) internal {
+    function _assumeNoOverflow(uint256 augend, uint256 addend) internal pure {
         unchecked {
             vm.assume(augend < augend + addend);
         }
