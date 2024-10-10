@@ -229,6 +229,21 @@ contract TermAuctionListInvariantsTest is KontrolTest {
     }
 
     /**
+     * Assume or assert that all offer amounts are > 0.
+     */
+    function _establishPositiveLockedOfferAmounts(Mode mode) internal view {
+        bytes32 current = _termAuctionList.head;
+
+        while (current != TermAuctionList.NULL_NODE) {
+            PendingOffer storage offer = _termAuctionList.offers[current];
+            uint256 offerAmount = offer.offerLocker.lockedOffer(current).amount;
+            _establish(mode, 0 < offerAmount);
+
+            current = _termAuctionList.nodes[current].next;
+        }
+    }
+
+    /**
      * Count the number of offers in the list.
      *
      * Note that this function guarantees the following postconditions:
@@ -522,7 +537,7 @@ contract TermAuctionListInvariantsTest is KontrolTest {
         _establishNoDuplicateOffers(Mode.Assert);
 
         // Assume that the invariants hold before the function is called
-        _establishOfferAmountMatchesAmountLocked(Mode.Assume, bytes32(0));
+        _establishPositiveOfferAmounts(Mode.Assume);
 
         // Assume that the calls to unlockOffers will not revert
         _guaranteeUnlockAlwaysSucceeds();
@@ -549,10 +564,10 @@ contract TermAuctionListInvariantsTest is KontrolTest {
         // Assert that the invariants are preserved
         _establishSortedByAuctionId(Mode.Assert);
         _establishNoDuplicateOffers(Mode.Assert);
-        _establishOfferAmountMatchesAmountLocked(Mode.Assert, bytes32(0));
+        _establishPositiveOfferAmounts(Mode.Assert);
 
         // Now the following invariants should hold as well
         _establishNoCompletedOrCancelledAuctions(Mode.Assert);
-        _establishPositiveOfferAmounts(Mode.Assert);
+        _establishPositiveLockedOfferAmounts(Mode.Assert);
     }
 }
