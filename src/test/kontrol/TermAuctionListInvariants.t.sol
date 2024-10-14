@@ -310,6 +310,57 @@ contract TermAuctionListInvariantsTest is KontrolTest {
         }
     }
 
+    function _termAuctionListToArray(uint256 length) internal view returns (bytes32[] memory offerIds) {
+        address current = _termAuctionList.head;
+        uint256 i;
+        offerIds = new address[](length);
+
+        while (current != TermAuctionList.NULL_NODE) {
+            offerIds[i++] = current;
+            current = _termAuctionList.nodes[current].next;
+        }
+    }
+
+    function _establishInsertListPreservation(bytes32 newOfferId, bytes32[] memory offerIds, uint256 offerIdsCount) internal view {
+        bytes32 current = _termAuctionList.head;
+        uint256 i = 0;
+
+        if(newOfferId != address(0)) {
+
+            while (current != TermAuctionList.NULL_NODE && i < offerIdsCount) {
+                if(current != offerIds[i]) {
+                    assert (current == newOfferId);
+                    current = _termAuctionList.nodes[current].next;
+                    break;
+                }
+                i++;
+                current = _termAuctionList.nodes[current].next;
+            }
+
+            if (current != TermAuctionListList.NULL_NODE && i == offerIdsCount) {
+                assert (current == newOfferId);
+            }
+        }
+
+        while (current != TermAuctionList.NULL_NODE && i < repoTokensCount) {
+            assert(current == offerIds[i++]);
+            current = _termAuctionList.nodes[current].next;
+        }
+    }
+
+    function _establishRemoveListPreservation(bytes32[] memory offerIds, uint256 offerIdsCount) internal view {
+        bytes32 current = _termAuctionList.head;
+        uint256 i = 0;
+
+        while (current != TermAuctionList.NULL_NODE && i < offerIdsCount) {
+            if(current == offerIds[i++]) {
+                current = _termAuctionList.nodes[current].next;
+            }
+        }
+
+        assert(current == TermAuctionList.NULL_NODE);
+    }
+
     /**
      * Etch the code at a given address to a given address in an external call,
      * reducing memory consumption in the caller function
